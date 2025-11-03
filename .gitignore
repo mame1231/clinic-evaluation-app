@@ -1,0 +1,21 @@
+node_modules/
+.env
+.env.*
+**/.env
+**/.env.*
+.vscode/
+.idea/
+.DS_Store
+**/build/
+**/dist/
+
+# SQLite DB (ignore local databases)
+*.sqlite
+*.sqlite3
+*.db
+backend/database.sqlite
+
+# --- allow env templates ---
+!*.env.example
+!*.env.sample
+!*.env.production.example
