@@ -13,17 +13,34 @@ import { CleanupService } from './services/cleanupService';
 
 dotenv.config();
 
+// ✨ ここから置き換え（app/PORT定義の直後あたりに）
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Security middleware
-app.use(helmet());
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL 
-    : 'http://localhost:3000',
+const allowedOrigin =
+  process.env.NODE_ENV === 'production'
+    ? (process.env.CORS_ORIGIN || '').trim()   // 例: https://clinic-evaluation-app.vercel.app
+    : 'http://localhost:3000';
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, cb) => {
+    // ブラウザ以外(curl/サーバ間)はoriginが無いことがある → 許可
+    if (!origin) return cb(null, true);
+    if (origin === allowedOrigin) return cb(null, true);
+    // 将来複数許可にしたい場合は allowedOrigin を配列にして includes() にする
+    return cb(new Error('Not allowed by CORS'));
+  },
   credentials: true,
-}));
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204,
+};
+
+// セキュリティ系 → CORS → プリフライト許可 の順
+app.use(helmet());
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+// --- ここまで CORS ---
 
 // Rate limiting
 const limiter = rateLimit({
