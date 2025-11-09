@@ -39,7 +39,6 @@ const corsOptions: cors.CorsOptions = {
 // セキュリティ系 → CORS → プリフライト許可 の順
 app.use(helmet());
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 // --- ここまで CORS ---
 
 // Rate limiting
